@@ -1,10 +1,10 @@
 /*  EXPRESS */
 const express = require('express');
 const app = express();
-const data = require('./data.json')
+const dataJson = require('./data.json')
 
 app.set('view engine', 'ejs');
-var access_token = "";
+let access_token = "";
 
 app.get('/', function(req, res) {
   res.render('pages/index',{client_id: clientID});
@@ -50,7 +50,7 @@ app.get('/success', function(req, res) {
     access_token = response.data.access_token
     res.render('pages/success',{ userData: response.data });
     try {
-        const response = axios.post('https://privacyapi.brandyourself.com/v1/scans',data,
+        const response = axios.post('https://privacyapi.brandyourself.com/v1/scans',dataJson,
         {
             headers: {
             Authorization: access_token
