@@ -16,8 +16,8 @@ $app->addRoutingMiddleware();
 $app->add(TwigMiddleware::create($app, $twig));
 $errorMiddleware = $app->addErrorMiddleware(true, true, true);
 
-$clientID = 'f99b9221a8bd0082c463';
-$clientSecret = 'c3e63b184223e18cc6cc3fe78e0fa0cbb16e3a01';
+$clientID = 'xxx';
+$clientSecret = 'xxxxxxxxx';
 
 $app->get('/', function ($request, $response, $args) {
     $view = Twig::fromRequest($request);

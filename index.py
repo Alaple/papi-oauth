@@ -11,8 +11,8 @@ from fastapi.templating import Jinja2Templates
 app = FastAPI(port='2400')
 
 access_token = ''
-clientID = 'f99b9221a8bd0082c463'
-clientSecret = 'c3e63b184223e18cc6cc3fe78e0fa0cbb16e3a01'
+clientID = 'xxxx'
+clientSecret = 'xxxxxx'
 
 pages = Jinja2Templates(directory='views/pages')
 
