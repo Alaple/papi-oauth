@@ -5,8 +5,8 @@ use Slim\Views\TwigMiddleware;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
+session_start();
 require __DIR__ . '/vendor/autoload.php';
-$data = json_encode('/data.json');
 
 $app = AppFactory::create();
 $client = new GuzzleHttp\Client();
@@ -16,7 +16,6 @@ $app->addRoutingMiddleware();
 $app->add(TwigMiddleware::create($app, $twig));
 $errorMiddleware = $app->addErrorMiddleware(true, true, true);
 
-$access_token = '';
 $clientID = 'f99b9221a8bd0082c463';
 $clientSecret = 'c3e63b184223e18cc6cc3fe78e0fa0cbb16e3a01';
 
@@ -29,13 +28,9 @@ $app->get('/', function ($request, $response, $args) {
 
 $app->get('/github/callback', function ($request, $response, $args) {    
     // The req.query object has the query params that were sent to this route.
-    $requestToken = $request->query->code;
+    $requestToken = explode("=",$request->getUri()->getQuery())[1];
     $clientID = $GLOBALS['clientID'];
     $clientSecret = $GLOBALS['clientSecret'];
-
-    echo $clientID;
-    echo $clientSecret;
-    echo $requestToken;
 
     $url = "https://github.com/login/oauth/access_token?client_id=$clientID&client_secret=$clientSecret&code=$requestToken";
     
@@ -49,39 +44,40 @@ $app->get('/github/callback', function ($request, $response, $args) {
         ]
     );
 
-    $GLOBALS['access_token'] = $result->data->access_token;
+    $accessToken = json_decode($result->getBody())->access_token;
+    $_SESSION['accessToken'] = $accessToken;
     return $response->withRedirect('/success');
 });
 
 $app->get('/success', function ($request, $response, $args) {
-    $access_token = $GLOBALS['access_token'];
-
-    echo $access_token;
+    $view = Twig::fromRequest($request);
+    $accessToken =  $_SESSION['accessToken'];
 
     $userData = $GLOBALS['client']->request(
         'GET',
         'https://api.github.com/user',
         [
             'headers' => [
-                'Authorization' => "token $access_token"
+                'Authorization' => "token $accessToken"
             ]
         ]
     );
 
     $result = $GLOBALS['client']->request(
         'POST',
-        'https://api.github.com/user',
+        'https://privacyapi.brandyourself.com/v1/scans',
         [
             'headers' => [
-                'Authorization' => "token $access_token"
+                'Authorization' => "token $accessToken"
             ],
-            'body' => $GLOBAL['data']
+            'body' => json_encode('/data.json')
         ]
     );
+    $jsonResult = json_decode($result->getBody());
+    echo "Response: $jsonResult";
 
-    echo "Response: $result";
     return $view->render($response, 'success.html', [
-        'userData' => $userData
+        'userData' => json_decode($userData->getBody())
     ]);
 });
 
