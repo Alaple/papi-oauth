@@ -8,3 +8,5 @@ papi_jwt.egg-info
 __pycache__
 
 # Php
+vendor
+composer.lock
